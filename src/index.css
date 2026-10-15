@@ -1,0 +1,170 @@
+@import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/figtree";
+
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                       */
+/* Module tints: tareas = sky, entreno = sage, finanzas = peach,       */
+/* logros = lilac. Each tint has an "ink" shade for text/strokes that  */
+/* passes AA on the tint and on paper.                                 */
+/* ------------------------------------------------------------------ */
+@theme {
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: #f8f7f3;
+  --color-sunken: #f0eee7;
+  --color-card: #ffffff;
+  --color-line: #e5e2d9;
+  --color-line-strong: #d4d0c4;
+  --color-ink: #252a2e;
+  --color-ink-2: #464c52;
+  --color-mute: #676d73;
+  --color-faint: #858b91;
+
+  --color-sage: #dce8df;
+  --color-sage-mid: #9cc2a6;
+  --color-sage-ink: #3d6a4d;
+  --color-sky: #dce7f5;
+  --color-sky-mid: #93b4dc;
+  --color-sky-ink: #345e8c;
+  --color-lilac: #e9e2f5;
+  --color-lilac-mid: #b3a3db;
+  --color-lilac-ink: #5f4c90;
+  --color-peach: #f6e2d6;
+  --color-peach-mid: #e3ac8a;
+  --color-peach-ink: #8f5130;
+
+  --color-danger: #b0413a;
+  --color-danger-soft: #f7dfdb;
+  --color-warn: #93600f;
+  --color-warn-soft: #f7ebd0;
+  --color-ok: #3d6a4d;
+
+  --radius-panel: 22px;
+  --radius-ctl: 12px;
+
+  --shadow-card: 0 1px 0 rgb(37 42 46 / 0.04), 0 1px 2px rgb(37 42 46 / 0.04);
+  --shadow-lift: 0 1px 0 rgb(37 42 46 / 0.04), 0 8px 24px -10px rgb(37 42 46 / 0.18);
+  --shadow-pop: 0 24px 60px -20px rgb(37 42 46 / 0.35), 0 2px 6px rgb(37 42 46 / 0.08);
+
+  --animate-fade: fade 180ms ease-out both;
+  --animate-rise: rise 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 320ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-sheet: sheet 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px) scale(0.985); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes sheet {
+    from { transform: translateY(100%); }
+    to { transform: none; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01";
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    font-weight: 600;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-sky-ink);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--color-sky);
+  }
+  input, select, textarea, button {
+    font: inherit;
+    color: inherit;
+  }
+  /* iOS zooms inputs under 16px */
+  @media (max-width: 640px) {
+    input, select, textarea { font-size: 16px; }
+  }
+}
+
+@layer components {
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .display-num {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    font-variation-settings: "wdth" 85;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-sunken) 0%, #f7f5ef 50%, var(--color-sunken) 100%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+    border-radius: 10px;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+  /* Checkbox tick drawing */
+  .tick path {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    transition: stroke-dashoffset 260ms ease-out 40ms;
+  }
+  .tick[data-on="true"] path {
+    stroke-dashoffset: 0;
+  }
+  .row-done {
+    transition: opacity 300ms ease, background-color 300ms ease;
+  }
+  .ring-progress {
+    transition: stroke-dashoffset 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .bar-progress {
+    transition: width 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
