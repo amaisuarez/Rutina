@@ -2,6 +2,7 @@ import { Suspense, useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { ArrowDownLeft, ArrowUpRight, CalendarPlus, Check, CircleAlert, Dumbbell, ListPlus, Menu as MenuIcon, Plus, X } from 'lucide-react'
 import { NAV } from './nav'
+import { BackupBanner } from './BackupBanner'
 import { cx } from '../ui/cx'
 import { PageSkeleton } from '../ui/Misc'
 import { useSaveStatus } from '../../services/persistence'
@@ -256,6 +257,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <QuickAdd compact />
         </header>
         <main id="main" className="mx-auto w-full max-w-[1180px] flex-1 px-4 pt-6 pb-[calc(96px+env(safe-area-inset-bottom))] sm:px-6 lg:px-10 lg:pt-10 lg:pb-16">
+          <BackupBanner />
           <Suspense fallback={<PageSkeleton />}>
             <div key={loc.pathname} className="animate-fade">
               {children}

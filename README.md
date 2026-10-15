@@ -28,15 +28,21 @@ A personal management web app in Spanish. Tasks, workouts, personal finances, a 
 ## Data and privacy
 
 - Everything is stored in this browser's `localStorage` and saved automatically.
+- On startup the app asks the browser for **persistent storage** (`navigator.storage.persist()`), so data isn't evicted to free space. Ajustes shows whether it was granted.
+- If more than 7 days pass without exporting a backup, a reminder appears with a button to download it.
+- On iPhone, add the app to the home screen: Safari can delete data from websites that go unused for 7 days.
 - **No sync across devices.** To move your data, export a JSON backup and import it on the other device.
 - No bank connections, passwords, API keys or accounts. Imported transactions are labelled "Importado".
-- Access to data goes through a `StorageAdapter` (`src/services/storage.ts`). Adding sync would need a backend with authentication (for example Supabase or Firebase) and an adapter that implements `load`/`save`. Nothing else in the app would change.
+- Access to data goes through a `StorageAdapter` (`app/src/services/storage.ts`). Adding sync would need a backend with authentication (for example Supabase or Firebase) and an adapter that implements `load`/`save`. Nothing else in the app would change.
 
 ## Development
 
 Requires **Node 20.19+ or 22.12+** (Vite 8).
 
+All app code is in the `app/` folder:
+
 ```bash
+cd app
 npm install
 npm run dev        # http://localhost:5173
 npm test           # unit tests: points, ledger, recurrence, finance, persistence, privacy
@@ -50,7 +56,7 @@ On first launch you can start with an empty app or load sample data. You can del
 
 1. Create a repository on GitHub and push this project to the `main` branch.
 2. In the repository, go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
-3. Each push to `main` runs `.github/workflows/deploy.yml`, which installs dependencies, runs the tests, builds and publishes.
+3. Each push to `main` runs `.github/workflows/deploy.yml`, which installs dependencies in `app/`, runs the tests, builds and publishes `app/dist`.
 4. The app will be available at `https://<user>.github.io/<repository>/`.
 
 The `base` path is derived automatically from the repository name (`GITHUB_REPOSITORY`). For a custom domain or a `<user>.github.io` repository, set `VITE_BASE=/` in the workflow. Navigation uses `HashRouter` (`/#/tareas`), so reloading any page works without server configuration.
@@ -58,18 +64,22 @@ The `base` path is derived automatically from the repository name (`GITHUB_REPOS
 ## Structure
 
 ```
-src/
-  components/      UI kit (buttons, modal, form, progress, tally marks, charts) and layout
-  features/
-    dashboard/     Hoy
-    tasks/         logic.ts (pure) + views
-    calendar/      unified items (derived, never copied)
-    fitness/       library.ts, recommend.ts, stats.ts + views and the live session
-    finance/       calc.ts (totals, budgets, recurrence, CSV) + views
-    gamification/  scoring.ts (points engine), stats.ts (streaks, achievements) + Logros
-    settings/
-  services/        storage (adapter + validation), persistence, demo data
-  store/           Zustand store: data and actions
-  hooks/ utils/ types/
-  test/
+.github/workflows/   deployment to GitHub Pages
+app/                 the app (Vite + React + TypeScript)
+  index.html, package.json, vite.config.ts
+  public/
+  src/
+    components/      UI kit (buttons, modal, form, progress, tally marks, charts) and layout
+    features/
+      dashboard/     Hoy
+      tasks/         logic.ts (pure) + views
+      calendar/      unified items (derived, never copied)
+      fitness/       library.ts, recommend.ts, stats.ts + views and the live session
+      finance/       calc.ts (totals, budgets, recurrence, CSV) + views
+      gamification/  scoring.ts (points engine), stats.ts (streaks, achievements) + Logros
+      settings/
+    services/        storage (adapter + validation), persistence, demo data
+    store/           Zustand store: data and actions
+    hooks/ utils/ types/
+    test/
 ```

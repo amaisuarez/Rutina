@@ -336,4 +336,8 @@ export interface Settings {
   dashboard: { order: WidgetId[]; hidden: WidgetId[] }
   onboarded: boolean
   hideAmounts: boolean
+  /** ISO timestamp of the last JSON backup exported (or imported). */
+  lastBackupAt?: string
+  /** The backup reminder stays hidden until this ISO timestamp. */
+  backupSnoozedUntil?: string
 }

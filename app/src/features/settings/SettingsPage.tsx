@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Database, Download, FileJson, HardDrive, Plus, RotateCcw, Sparkles, Trash2, Upload, X } from 'lucide-react'
+import { Database, Download, FileJson, HardDrive, ShieldCheck, Plus, RotateCcw, Sparkles, Trash2, Upload, X } from 'lucide-react'
 import type { Difficulty, Intensity, ScoringConfig, TxType } from '../../types'
 import { selectData, useStore } from '../../store'
 import { confirm, toast } from '../../store/ui'
@@ -8,13 +8,12 @@ import { Badge, PageHeader, Panel, PanelTitle } from '../../components/ui/Misc'
 import { Field, Input, Segmented, Select, Switch } from '../../components/ui/Form'
 import { GoalStepper } from '../tasks/TasksPage'
 import { DEFAULT_SCORING, DIFFICULTY_LABEL, INTENSITY_LABEL } from '../gamification/scoring'
-import { makeBackup, BackupError } from '../../services/storage'
+import { BackupError } from '../../services/storage'
+import { backupStatus, checkPersistence, downloadBackup, usePersistState } from '../../services/backup'
 import { resetAll, restoreBackup } from '../../services/persistence'
 import { hasDemo, loadDemo } from '../../services/demo'
 import { exportTransactionsCSV } from '../finance/TransactionsView'
 import { ALL_WIDGETS } from '../../store/defaults'
-import { download } from '../../utils/csv'
-import { today } from '../../utils/dates'
 
 const CURRENCIES = [
   ['EUR', 'Euro (€)'],
@@ -61,13 +60,15 @@ export default function SettingsPage() {
   const [newTaskCat, setNewTaskCat] = useState('')
   const [newCat, setNewCat] = useState({ name: '', type: 'expense' as TxType, color: '#7f8fa6' })
   const demo = hasDemo()
+  const persist = usePersistState((s) => s.state)
   const sc = settings.scoring
   const setScoring = (patch: Partial<ScoringConfig>) => updateSettings({ scoring: { ...sc, ...patch } })
 
   const exportJSON = () => {
-    download(`rutina-copia-${today()}.json`, makeBackup(selectData(useStore.getState())), 'application/json')
+    downloadBackup()
     toast('Copia de seguridad descargada')
   }
+  const backup = backupStatus(selectData(useStore.getState()))
 
   const importJSON = async (file: File) => {
     const ok = await confirm({
@@ -314,6 +315,41 @@ export default function SettingsPage() {
               </p>
               <p className="mt-2">Para pasar los datos a otro dispositivo, exporta una copia aquí e impórtala allí. Si borras los datos del navegador, se pierden: haz copias de vez en cuando.</p>
               <p className="mt-2">La sincronización entre dispositivos necesitaría un servicio externo con inicio de sesión. La app está preparada para añadirlo, pero ahora no existe.</p>
+              <div className="mt-4 space-y-2 border-t border-line pt-3">
+                <p className="flex items-start gap-2">
+                  <Download size={15} className="mt-0.5 shrink-0" />
+                  <span>
+                    Última copia:{' '}
+                    <span className="font-medium text-ink">
+                      {backup.never ? 'nunca' : backup.daysSince === 0 ? 'hoy' : backup.daysSince === 1 ? 'ayer' : `hace ${backup.daysSince} días`}
+                    </span>
+                    . Te avisaremos si pasan más de 7 días.
+                  </span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <ShieldCheck size={15} className={persist === 'granted' ? 'mt-0.5 shrink-0 text-ok' : 'mt-0.5 shrink-0'} />
+                  <span>
+                    {persist === 'granted' && (
+                      <>
+                        Almacenamiento permanente: <span className="font-medium text-ok">activado</span>. El navegador no borrará tus datos para liberar espacio.
+                      </>
+                    )}
+                    {persist === 'denied' && (
+                      <>
+                        Almacenamiento permanente: <span className="font-medium text-ink">no concedido</span>. El navegador lo concede según el uso; en iPhone ayuda añadir la app a la pantalla de inicio.{' '}
+                        <button
+                          type="button"
+                          className="font-medium text-ink underline underline-offset-2"
+                          onClick={async () => toast((await checkPersistence(true)) === 'granted' ? 'Almacenamiento permanente activado' : 'El navegador no lo ha concedido todavía')}
+                        >
+                          Volver a pedirlo
+                        </button>
+                      </>
+                    )}
+                    {(persist === 'unsupported' || persist === 'unknown') && 'Este navegador no permite pedir almacenamiento permanente. Haz copias con frecuencia.'}
+                  </span>
+                </p>
+              </div>
             </div>
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2">

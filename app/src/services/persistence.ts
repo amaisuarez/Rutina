@@ -73,6 +73,8 @@ export function restoreBackup(json: string): void {
   }
   const data = normalize(parsed)
   data.settings.onboarded = true
+  // The user holds this exact file, so it counts as an up-to-date backup.
+  data.settings.lastBackupAt = new Date().toISOString()
   useStore.getState().hydrate(data)
   useStore.getState().maintain()
 }
